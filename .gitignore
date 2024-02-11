@@ -9,3 +9,4 @@ Library
 /omicron-unity.CSharp.Editor.csproj
 /omicron-unity.CSharp.csproj
 /Build
+*.apk
