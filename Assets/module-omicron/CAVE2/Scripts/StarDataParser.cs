@@ -8,6 +8,8 @@ using UnityEngine;
 public class StarDataParser : MonoBehaviour
 
 {
+    public GameObject cam;
+
     // for stars
     public TextAsset starDataSource;
     public GameObject starPrefab;
@@ -59,6 +61,15 @@ public class StarDataParser : MonoBehaviour
 
     void Update()
     {
+        foreach (var keyValuePair in starList)
+        {
+            var star = keyValuePair.Value;
+            float distanceToCamera = Vector3.Distance(star.instance.transform.position, cam.transform.position);
+
+            // Only render the star if it's within 25 units of the camera
+            star.instance.GetComponent<MeshRenderer>().enabled = distanceToCamera <= 50;
+        }
+
         // Check if the space bar is pressed
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -149,6 +160,11 @@ public class StarDataParser : MonoBehaviour
             star.instance = Instantiate(starPrefab, star.position, Quaternion.LookRotation(star.position)) as GameObject;
             star.instance.transform.localScale *= scaleRatioOfStars * star.relMag;
             star.instance.GetComponent<Renderer>().material.color = GetStarColor(spect: star.spect);
+
+            float distanceToCamera = Vector3.Distance(star.instance.transform.position, cam.transform.position);
+
+            // Only render the star if it's within 25 units of the camera
+            star.instance.GetComponent<MeshRenderer>().enabled = distanceToCamera <= 25;
         }
     }
 
@@ -156,8 +172,6 @@ public class StarDataParser : MonoBehaviour
     {
         string fullText = exoplanetDataSource.text;
         string[] dataRows = fullText.Split('\n');
-
-        Debug.Log(dataRows.Length);
 
         bool isFirstRow = true;
 
