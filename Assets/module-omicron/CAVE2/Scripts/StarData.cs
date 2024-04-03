@@ -12,4 +12,8 @@ public class StarData
     public float dist;
     public Vector3 position;
     public string spect;
+    public float vx;
+    public float vy;
+    public float vz;
+    public GameObject instance;
 }
