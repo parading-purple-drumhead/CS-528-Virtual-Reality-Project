@@ -8,6 +8,7 @@ using UnityEngine;
 public class StarDataParser : MonoBehaviour
 
 {
+    public GameObject ConstellationLines;
     public GameObject cam;
     Vector3 lastRenderPosition;
     private float distanceToRender = 50f;
@@ -22,6 +23,7 @@ public class StarDataParser : MonoBehaviour
     // for constellations
     public TextAsset constellationDataSource;
     public ConstellationList constellationList = new ConstellationList();
+    public Dictionary<string, Vector3> constellationPointsDict = new Dictionary<string, Vector3>();
     public LineRenderer linePrefab;
 
     // for exoplanet
@@ -147,16 +149,37 @@ public class StarDataParser : MonoBehaviour
     {
         constellationList = JsonUtility.FromJson<ConstellationList>(constellationDataSource.text);
 
+        //GameObject constellationLines = new GameObject("constellationLines");
+
         foreach (Constellation constellation in constellationList.constellations)
         {
             foreach (Pair pair in constellation.pairs)
             {
-                Vector3[] pairPositions = new Vector3[2];
+                //Vector3[] pairPositions = new Vector3[2];
 
-                pairPositions[0] = GetStarPosition(pair.pair[0].ToString());
-                pairPositions[1] = GetStarPosition(pair.pair[1].ToString());
+                //pairPositions[0] = GetStarPosition(pair.pair[0].ToString());
+                //pairPositions[1] = GetStarPosition(pair.pair[1].ToString());
 
-                RenderLine(pairPositions);
+                
+
+                Vector3 position1 = GetStarPosition(pair.pair[0].ToString());
+                Vector3 position2 = GetStarPosition(pair.pair[1].ToString());
+
+                constellationPointsDict[pair.pair[0].ToString()] = position1;
+                constellationPointsDict[pair.pair[1].ToString()] = position2;
+
+                // Create a line between the stars
+                GameObject lineObject = new GameObject();
+                lineObject.transform.parent = ConstellationLines.transform; // Set the parent to constellationLines
+                lineObject.name = pair.pair[0] + "-" + pair.pair[1];
+                LineRenderer line = lineObject.AddComponent<LineRenderer>();
+                line.SetPosition(0, position1);
+                line.SetPosition(1, position2);
+                line.useWorldSpace = true;
+                line.startWidth = line.endWidth = 0.1f;
+                line.material.color = Color.green;
+
+                //RenderLine(pairPositions);
             }
         }
     }
@@ -172,11 +195,6 @@ public class StarDataParser : MonoBehaviour
     {
         foreach (var keyValuePair in starList)
         {
-            //var star = keyValuePair.Value;
-            //GameObject instance = Instantiate(starPrefab, star.position, Quaternion.LookRotation(star.position)) as GameObject;
-            //star.gameObject = instance;
-            //instance.transform.localScale *= scaleRatioOfStars * star.relMag;
-            //instance.GetComponent<Renderer>().material.color = GetStarColor(star.spect);
             var star = keyValuePair.Value;
             star.instance = Instantiate(starPrefab, star.position, Quaternion.LookRotation(star.position)) as GameObject;
             star.instance.transform.localScale *= scaleRatioOfStars * star.relMag;
@@ -211,15 +229,6 @@ public class StarDataParser : MonoBehaviour
                 //StarData star = new StarData();
                 try
                 {
-                    //star.absMag = float.Parse(values[5]);
-                    //star.relMag = float.Parse(values[6]);
-                    //star.dist = float.Parse(values[1]);
-                    //star.position = new Vector3(float.Parse(values[2]), float.Parse(values[3]), float.Parse(values[4]));
-                    //star.vx = float.Parse(values[7]) * 1.02269E-6f;
-                    //star.vy = float.Parse(values[8]) * 1.02269E-6f;
-                    //star.vz = float.Parse(values[9]) * 1.02269E-6f;
-                    //star.spect = values[10].Trim();
-                    //starList.Add(values[0].Substring(0, values[0].Length - 2), star);
                     exoplanetList[values[0].Trim()] = int.Parse(values[1]);
                 }
 
@@ -293,11 +302,13 @@ public class StarDataParser : MonoBehaviour
     }
 
 
-    void RenderLine(Vector3[] positions)
-    {
-        LineRenderer lineRenderer = Instantiate(linePrefab, transform);
-        lineRenderer.positionCount = positions.Length;
-        lineRenderer.SetPositions(positions);
-        lineRenderer.useWorldSpace = true;
-    }
+    //void RenderLine(Vector3[] positions)
+    //{
+    //    LineRenderer lineRenderer = Instantiate(linePrefab, transform);
+    //    lineRenderer.positionCount = positions.Length;
+    //    lineRenderer.SetPositions(positions);
+    //    lineRenderer.useWorldSpace = true;
+
+    //    //return lineRenderer.gameObject;
+    //}
 }
