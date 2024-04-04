@@ -33,19 +33,6 @@ public class StarMovement : MonoBehaviour
         }
     }
 
-    //void MoveStar()
-    //{
-    //    foreach (var keyValuePair in starList) {
-    //        var star = keyValuePair.Value;
-
-    //        // Assuming star.instance is of type GameObject and star.vx, star.vy, star.vz are of type float
-    //        Vector3 velocity = new Vector3(star.vx, star.vy, star.vz);
-
-    //        // Update the position of the star instance
-    //        star.instance.transform.position += velocity * Time.deltaTime * 1000;
-    //    }
-    //}
-
     void MoveStar()
     {
         // Get the camera's position
@@ -55,24 +42,18 @@ public class StarMovement : MonoBehaviour
             var star = keyValuePair.Value;
 
             // Calculate the distance from the star to the camera
-            float distanceToCamera = Vector3.Distance(star.instance.transform.position, cam.transform.position);
+            float distanceToCamera = Vector3.Distance(star.position, cam.transform.position);
 
-            // Only move and render the star if it's within 25 units of the camera
-            if (distanceToCamera <= 25)
+            Vector3 velocity = new Vector3(star.vx, star.vy, star.vz);
+
+            // Update the position of the star data
+            star.position += velocity * Time.deltaTime * 1000;
+
+            // If the star is within 25 units of the camera, update the position of the star instance
+            if (distanceToCamera <= 25f)
             {
-                // Assuming star.instance is of type GameObject and star.vx, star.vy, star.vz are of type float
-                Vector3 velocity = new Vector3(star.vx, star.vy, star.vz);
-
                 // Update the position of the star instance
-                star.instance.transform.position += velocity * Time.deltaTime * 1000;
-
-                // Enable the MeshRenderer
-                star.instance.GetComponent<MeshRenderer>().enabled = true;
-            }
-            else
-            {
-                // Disable the MeshRenderer
-                star.instance.GetComponent<MeshRenderer>().enabled = false;
+                star.instance.transform.position = star.position;
             }
         }
     }

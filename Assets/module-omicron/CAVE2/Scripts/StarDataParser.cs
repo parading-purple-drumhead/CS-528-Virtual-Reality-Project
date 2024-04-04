@@ -9,6 +9,8 @@ public class StarDataParser : MonoBehaviour
 
 {
     public GameObject cam;
+    Vector3 lastRenderPosition;
+    private float distanceToRender = 50f;
 
     // for stars
     public TextAsset starDataSource;
@@ -50,6 +52,9 @@ public class StarDataParser : MonoBehaviour
 
     void Start()
     {
+        // Initialize lastRenderPosition to the player's current position
+        lastRenderPosition = cam.transform.position;
+
         ParseExoplanetData();
 
         ParseStarData();
@@ -61,13 +66,12 @@ public class StarDataParser : MonoBehaviour
 
     void Update()
     {
-        foreach (var keyValuePair in starList)
-        {
-            var star = keyValuePair.Value;
-            float distanceToCamera = Vector3.Distance(star.instance.transform.position, cam.transform.position);
 
-            // Only render the star if it's within 25 units of the camera
-            star.instance.GetComponent<MeshRenderer>().enabled = distanceToCamera <= 50;
+        if (Vector3.Distance(cam.transform.position, lastRenderPosition) > 10)
+        {
+            // Call SelectiveRender and update lastRenderPosition
+            SelectiveRender();
+            lastRenderPosition = cam.transform.position;
         }
 
         // Check if the space bar is pressed
@@ -78,6 +82,11 @@ public class StarDataParser : MonoBehaviour
 
             // Update the colors of the stars
             UpdateStarColors();
+        }
+
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            distanceToRender = distanceToRender == 25f? 50f:25f;
         }
     }
 
@@ -119,6 +128,18 @@ public class StarDataParser : MonoBehaviour
                     continue;
                 }
             }
+        }
+    }
+
+    void SelectiveRender()
+    {
+        foreach (var keyValuePair in starList)
+        {
+            var star = keyValuePair.Value;
+            float distanceToCamera = Vector3.Distance(star.instance.transform.position, cam.transform.position);
+
+            // Only render the star if it's within 25 units of the camera
+            star.instance.GetComponent<MeshRenderer>().enabled = distanceToCamera <= distanceToRender;
         }
     }
 
@@ -164,7 +185,7 @@ public class StarDataParser : MonoBehaviour
             float distanceToCamera = Vector3.Distance(star.instance.transform.position, cam.transform.position);
 
             // Only render the star if it's within 25 units of the camera
-            star.instance.GetComponent<MeshRenderer>().enabled = distanceToCamera <= 25;
+            star.instance.GetComponent<MeshRenderer>().enabled = distanceToCamera <= distanceToRender;
         }
     }
 
@@ -219,36 +240,6 @@ public class StarDataParser : MonoBehaviour
             star.instance.GetComponent<Renderer>().material.color = usePlanetColorScheme? GetStarColor(starId: keyValuePair.Key) : GetStarColor(spect: star.spect);
         }
     }
-
-    //Color GetStarColor(string spect)
-    //{
-    //    Color orange = new Color(1.0f, 0.64f, 0.0f); // RGB for Orange
-
-    //    if (spect == "O")
-    //    {
-    //        return Color.blue;
-    //    }
-    //    else if (spect == "B" || spect == "A")
-    //    {
-    //        return Color.white;
-    //    }
-    //    else if (spect == "F" || spect == "G")
-    //    {
-    //        return Color.yellow;
-    //    }
-    //    else if (spect == "K")
-    //    {
-    //        return orange; // Use the custom orange color
-    //    }
-    //    else if (spect == "M")
-    //    {
-    //        return Color.red;
-    //    }
-    //    else
-    //    {
-    //        return Color.white; // Default color
-    //    }
-    //}
 
     Color GetStarColor(string starId = "", string spect = "")
     {
