@@ -3,16 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using UnityEngine;
+using TMPro;
 
 public class StarMovement : MonoBehaviour
 {
     public GameObject ConstellationLines;
     private StarDataParser starDataParser;
+    public TextMeshProUGUI timeElapsedText;
+    public GameObject cam;
+
     Dictionary<string, StarData> starList = new Dictionary<string, StarData>();
     Dictionary<string, UnityEngine.Vector3> constellationPointsDict = new Dictionary<string, UnityEngine.Vector3>();
-    private bool moveStars = false;
 
-    public GameObject cam;
+    public int timeSpeedFactor = 1000;
+    private bool moveTimeForward = false;
+    private bool moveTimeBackward = false;
+    float yearsPassed = 0;
 
     void Start()
     {
@@ -34,21 +40,45 @@ public class StarMovement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.M))
         {
-            moveStars = !moveStars;
+            moveTimeForward = !moveTimeForward;
         }
 
-        if (moveStars)
+        if (Input.GetKeyDown(KeyCode.B))
         {
-            MoveStar();
-            //InvokeRepeating("MoveConstellations", 0f, 2f);
+            moveTimeBackward = !moveTimeBackward;
+        }
+
+        if (moveTimeForward)
+        {
+            moveTimeBackward = false;
+            MoveStar(1);
+            MoveConstellations();
+        }
+
+        if (moveTimeBackward)
+        {
+            moveTimeForward = false;
+            MoveStar(-1);
             MoveConstellations();
         }
 
     }
 
-    void MoveStar()
+    public void MoveTimeForward()
+    {
+        moveTimeForward = !moveTimeForward;
+    }
+
+    public void MoveTimeBackward()
+    {
+        moveTimeBackward = !moveTimeBackward;
+    }
+
+    void MoveStar(int direction)
     {
         // Get the camera's position
+
+        
 
         foreach (var keyValuePair in starList)
         {
@@ -57,10 +87,10 @@ public class StarMovement : MonoBehaviour
             // Calculate the distance from the star to the camera
             float distanceToCamera = UnityEngine.Vector3.Distance(star.position, cam.transform.position);
 
-            UnityEngine.Vector3 velocity = new UnityEngine.Vector3(star.vx, star.vy, star.vz);
+            UnityEngine.Vector3 velocity = new UnityEngine.Vector3(star.vx, star.vy, star.vz) * direction;
 
             // Update the position of the star data
-            star.position += velocity * Time.deltaTime * 10000;
+            star.position += velocity * Time.deltaTime * timeSpeedFactor;
 
             constellationPointsDict[keyValuePair.Key] = star.position;
 
@@ -71,6 +101,9 @@ public class StarMovement : MonoBehaviour
                 star.instance.transform.position = star.position;
             }
         }
+        yearsPassed += timeSpeedFactor * Time.deltaTime * direction;
+
+        timeElapsedText.text = "Time Elapsed:\n" + (int) yearsPassed + " years";
     }
 
     void MoveConstellations()
@@ -89,5 +122,4 @@ public class StarMovement : MonoBehaviour
             constellationLine.gameObject.GetComponent<LineRenderer>().SetPosition(1, star2Pos);
         }
     }
-
 }

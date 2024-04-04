@@ -23,7 +23,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (Mathf.Abs(distance - previousDistance) > 0.01f)
         {
-            distanceText.text = "Distance:\n" + distance.ToString("F2") + " units";
+            distanceText.text = "Distance:\n" + distance.ToString("F2") + " parsecs";
             previousDistance = distance;
         }
     }

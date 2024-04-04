@@ -54,6 +54,7 @@ public class StarDataParser : MonoBehaviour
 
     void Start()
     {
+        InvokeRepeating("LookAtMe", 0f, 2f);
         // Initialize lastRenderPosition to the player's current position
         lastRenderPosition = cam.transform.position;
 
@@ -79,16 +80,7 @@ public class StarDataParser : MonoBehaviour
         // Check if the space bar is pressed
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            // Toggle the color scheme
-            usePlanetColorScheme = !usePlanetColorScheme;
-
-            // Update the colors of the stars
-            UpdateStarColors();
-        }
-
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            distanceToRender = distanceToRender == 25f? 50f:25f;
+            
         }
     }
 
@@ -133,6 +125,19 @@ public class StarDataParser : MonoBehaviour
         }
     }
 
+    void LookAtMe()
+    {
+        foreach (var keyValuePair in starList)
+        {
+            var star = keyValuePair.Value;
+            float distanceToCamera = Vector3.Distance(star.instance.transform.position, cam.transform.position);
+
+            //Only render the star if it's within 25 units of the camera
+            if(distanceToCamera <= distanceToRender)
+                star.instance.transform.LookAt(cam.transform);
+        }
+    }
+
     void SelectiveRender()
     {
         foreach (var keyValuePair in starList)
@@ -149,19 +154,10 @@ public class StarDataParser : MonoBehaviour
     {
         constellationList = JsonUtility.FromJson<ConstellationList>(constellationDataSource.text);
 
-        //GameObject constellationLines = new GameObject("constellationLines");
-
         foreach (Constellation constellation in constellationList.constellations)
         {
             foreach (Pair pair in constellation.pairs)
             {
-                //Vector3[] pairPositions = new Vector3[2];
-
-                //pairPositions[0] = GetStarPosition(pair.pair[0].ToString());
-                //pairPositions[1] = GetStarPosition(pair.pair[1].ToString());
-
-                
-
                 Vector3 position1 = GetStarPosition(pair.pair[0].ToString());
                 Vector3 position2 = GetStarPosition(pair.pair[1].ToString());
 
@@ -177,9 +173,7 @@ public class StarDataParser : MonoBehaviour
                 line.SetPosition(1, position2);
                 line.useWorldSpace = true;
                 line.startWidth = line.endWidth = 0.1f;
-                line.material.color = Color.green;
-
-                //RenderLine(pairPositions);
+                line.material.color = Color.white;
             }
         }
     }
@@ -267,7 +261,6 @@ public class StarDataParser : MonoBehaviour
             // Limit the number of planets to the number of colors in the color scheme
             numOfPlanets = Mathf.Min(numOfPlanets, planetColorScheme.Length - 1);
 
-
             return planetColorScheme[numOfPlanets];
         }
         else
@@ -301,14 +294,45 @@ public class StarDataParser : MonoBehaviour
         }
     }
 
+    public void ScaleStarDistances(float newDistance)
+    {
+        // Compute the ratio of the new distance to the current maximum visible distance
+        float scaleRatio = newDistance / distanceToRender;
 
-    //void RenderLine(Vector3[] positions)
-    //{
-    //    LineRenderer lineRenderer = Instantiate(linePrefab, transform);
-    //    lineRenderer.positionCount = positions.Length;
-    //    lineRenderer.SetPositions(positions);
-    //    lineRenderer.useWorldSpace = true;
+        // Iterate over each star in the list
+        foreach (var keyValuePair in starList)
+        {
+            var star = keyValuePair.Value;
 
-    //    //return lineRenderer.gameObject;
-    //}
+            // Compute the vector from the camera to the current star position
+            Vector3 offsetFromCamera = star.position - cam.transform.position;
+
+            // Scale this offset by our computed ratio
+            Vector3 scaledOffset = offsetFromCamera * scaleRatio;
+
+            // Compute the new position of the star by adding the scaled offset to the camera position
+            Vector3 updatedPosition = cam.transform.position + scaledOffset;
+
+            // Update the position in both the star data and the corresponding GameObject
+            star.position = updatedPosition;
+            star.instance.transform.position = updatedPosition;
+        }
+
+        // Update the maximum visible distance to the new distance
+        distanceToRender = newDistance;
+    }
+
+    public void UpdateDistanceToRender()
+    {
+        distanceToRender = distanceToRender == 25f ? 50f : 25f;
+    }
+
+    public void ChangeColorScheme()
+    {
+        // Toggle the color scheme
+        usePlanetColorScheme = !usePlanetColorScheme;
+
+        // Update the colors of the stars
+        UpdateStarColors();
+    }
 }
