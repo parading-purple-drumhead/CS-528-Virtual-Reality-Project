@@ -12,7 +12,11 @@ public class StarMovement : MonoBehaviour
     public TextMeshProUGUI timeElapsedText;
     private UnityEngine.Vector3 initialUserPosition;
     private UnityEngine.Quaternion initialUserRotation;
+    private UnityEngine.Vector3 initialMenuPosition;
+    private UnityEngine.Quaternion initialMenuRotation;
+    public GameObject player;
     public GameObject cam;
+    public GameObject menu;
 
     Dictionary<string, StarData> starList = new Dictionary<string, StarData>();
     Dictionary<string, StarData> originalStarList = new Dictionary<string, StarData>();
@@ -28,8 +32,11 @@ public class StarMovement : MonoBehaviour
         // Find the StarDataParser object
         starDataParser = FindObjectOfType<StarDataParser>();
 
-        initialUserPosition = cam.transform.position;
+        initialUserPosition = player.transform.position;
         initialUserRotation = cam.transform.rotation;
+
+        initialMenuPosition = menu.transform.position;
+        initialMenuRotation = menu.transform.rotation;
     }
 
     void Update()
@@ -40,17 +47,18 @@ public class StarMovement : MonoBehaviour
             originalStarList = new Dictionary<string, StarData>();
             foreach (KeyValuePair<string, StarData> entry in starDataParser.starList)
             {
+                var star = entry.Value;
                 StarData originalStarData = new StarData
                 {
-                    absMag = entry.Value.absMag,
-                    relMag = entry.Value.relMag,
-                    dist = entry.Value.dist,
-                    position = new UnityEngine.Vector3(entry.Value.position.x, entry.Value.position.y, entry.Value.position.z),
-                    spect = entry.Value.spect,
-                    vx = entry.Value.vx,
-                    vy = entry.Value.vy,
-                    vz = entry.Value.vz,
-                    instance = entry.Value.instance // Assuming GameObject instance can be shared
+                    absMag = star.absMag,
+                    relMag = star.relMag,
+                    dist = star.dist,
+                    position = new UnityEngine.Vector3(star.position.x, star.position.y, star.position.z),
+                    spect = star.spect,
+                    vx = star.vx,
+                    vy = star.vy,
+                    vz = star.vz,
+                    instance = star.instance
                 };
                 originalStarList.Add(entry.Key, originalStarData);
             }
@@ -89,10 +97,13 @@ public class StarMovement : MonoBehaviour
             star.instance.transform.position = originalStarList[keyValuePair.Key].position;
         }
 
-        cam.transform.position = initialUserPosition;
+        player.transform.position = initialUserPosition;
         cam.transform.rotation = initialUserRotation;
+        menu.transform.position = initialMenuPosition;
+        menu.transform.rotation = initialMenuRotation;
         yearsPassed = 0;
         timeElapsedText.text = "Time Elapsed:\n" + (int)yearsPassed + " years";
+
     }
 
     void MoveStar(int direction)
@@ -102,7 +113,7 @@ public class StarMovement : MonoBehaviour
             var star = keyValuePair.Value;
 
             // Calculate the distance from the star to the camera
-            float distanceToCamera = UnityEngine.Vector3.Distance(star.position, cam.transform.position);
+            float distanceToCamera = UnityEngine.Vector3.Distance(star.position, player.transform.position);
 
             UnityEngine.Vector3 velocity = new UnityEngine.Vector3(star.vx, star.vy, star.vz) * direction;
 
