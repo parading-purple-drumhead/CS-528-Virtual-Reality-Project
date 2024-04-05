@@ -10,14 +10,17 @@ public class StarMovement : MonoBehaviour
     public GameObject ConstellationLines;
     private StarDataParser starDataParser;
     public TextMeshProUGUI timeElapsedText;
+    private UnityEngine.Vector3 initialUserPosition;
+    private UnityEngine.Quaternion initialUserRotation;
     public GameObject cam;
 
     Dictionary<string, StarData> starList = new Dictionary<string, StarData>();
+    Dictionary<string, StarData> originalStarList = new Dictionary<string, StarData>();
     Dictionary<string, UnityEngine.Vector3> constellationPointsDict = new Dictionary<string, UnityEngine.Vector3>();
 
     public int timeSpeedFactor = 1000;
-    private bool moveTimeForward = false;
-    private bool moveTimeBackward = false;
+    private bool moveTime = false;
+    private int moveDirection = 1;
     float yearsPassed = 0;
 
     void Start()
@@ -25,12 +28,32 @@ public class StarMovement : MonoBehaviour
         // Find the StarDataParser object
         starDataParser = FindObjectOfType<StarDataParser>();
 
+        initialUserPosition = cam.transform.position;
+        initialUserRotation = cam.transform.rotation;
     }
 
     void Update()
     {
-        if (starList.Count == 0) { 
+        if (starList.Count == 0)
+        {
             starList = starDataParser.starList;
+            originalStarList = new Dictionary<string, StarData>();
+            foreach (KeyValuePair<string, StarData> entry in starDataParser.starList)
+            {
+                StarData originalStarData = new StarData
+                {
+                    absMag = entry.Value.absMag,
+                    relMag = entry.Value.relMag,
+                    dist = entry.Value.dist,
+                    position = new UnityEngine.Vector3(entry.Value.position.x, entry.Value.position.y, entry.Value.position.z),
+                    spect = entry.Value.spect,
+                    vx = entry.Value.vx,
+                    vy = entry.Value.vy,
+                    vz = entry.Value.vz,
+                    instance = entry.Value.instance // Assuming GameObject instance can be shared
+                };
+                originalStarList.Add(entry.Key, originalStarData);
+            }
         }
 
         if (constellationPointsDict.Count == 0)
@@ -38,48 +61,42 @@ public class StarMovement : MonoBehaviour
             constellationPointsDict = starDataParser.constellationPointsDict;
         }
 
-        if (Input.GetKeyDown(KeyCode.M))
+        if (moveTime)
         {
-            moveTimeForward = !moveTimeForward;
-        }
-
-        if (Input.GetKeyDown(KeyCode.B))
-        {
-            moveTimeBackward = !moveTimeBackward;
-        }
-
-        if (moveTimeForward)
-        {
-            moveTimeBackward = false;
-            MoveStar(1);
+            MoveStar(moveDirection);
             MoveConstellations();
         }
+    }
 
-        if (moveTimeBackward)
+    public void MoveTime(int direction) {
+        moveTime = true;
+        moveDirection = direction;
+    }
+
+    public void PauseTime()
+    {
+        moveTime = false;
+    }
+
+    public void ResetTime()
+    {
+        moveTime = false;
+
+        foreach (var keyValuePair in starList)
         {
-            moveTimeForward = false;
-            MoveStar(-1);
-            MoveConstellations();
+            
+            var star = keyValuePair.Value;
+            star.instance.transform.position = originalStarList[keyValuePair.Key].position;
         }
 
-    }
-
-    public void MoveTimeForward()
-    {
-        moveTimeForward = !moveTimeForward;
-    }
-
-    public void MoveTimeBackward()
-    {
-        moveTimeBackward = !moveTimeBackward;
+        cam.transform.position = initialUserPosition;
+        cam.transform.rotation = initialUserRotation;
+        yearsPassed = 0;
+        timeElapsedText.text = "Time Elapsed:\n" + (int)yearsPassed + " years";
     }
 
     void MoveStar(int direction)
     {
-        // Get the camera's position
-
-        
-
         foreach (var keyValuePair in starList)
         {
             var star = keyValuePair.Value;
@@ -102,27 +119,13 @@ public class StarMovement : MonoBehaviour
             }
         }
         yearsPassed += timeSpeedFactor * Time.deltaTime * direction;
-
         timeElapsedText.text = "Time Elapsed:\n" + (int) yearsPassed + " years";
     }
 
     void MoveConstellations()
     {
-        
-
         foreach (Transform constellation in ConstellationLines.transform)
         {
-            //Debug.Log(constellationLine.gameObject.name);
-            //string lineName = constellationLine.gameObject.name;
-            //var stars = lineName.Split('-'); 
-            //var starHip1 = stars[0];
-            //var starHip2 = stars[1];
-
-            //UnityEngine.Vector3 star1Pos = constellationPointsDict[starHip1];
-            //UnityEngine.Vector3 star2Pos = constellationPointsDict[starHip2];
-
-            //constellationLine.gameObject.GetComponent<LineRenderer>().SetPosition(0, star1Pos);
-            //constellationLine.gameObject.GetComponent<LineRenderer>().SetPosition(1, star2Pos);
             if (constellation.gameObject.activeInHierarchy)
             {
                 foreach (Transform constellationLine in constellation.gameObject.transform)

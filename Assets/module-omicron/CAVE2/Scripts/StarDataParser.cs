@@ -18,7 +18,6 @@ public class StarDataParser : MonoBehaviour
     public TextAsset starDataSource;
     public GameObject starPrefab;
     public Dictionary<string, StarData> starList = new Dictionary<string, StarData>();
-    public int numberOfStarsToGenerate = 100000;
     public float scaleRatioOfStars = 0.05f;
 
     // for constellations
@@ -79,32 +78,6 @@ public class StarDataParser : MonoBehaviour
             SelectiveRender();
             lastRenderPosition = cam.transform.position;
         }
-
-        // Check if the space bar is pressed
-        if (Input.GetKeyDown(KeyCode.F1))
-        {
-            SwitchConstellationSet(0);
-        }
-        if (Input.GetKeyDown(KeyCode.F2))
-        {
-            SwitchConstellationSet(1);
-        }
-        if (Input.GetKeyDown(KeyCode.F3))
-        {
-            SwitchConstellationSet(2);
-        }
-        if (Input.GetKeyDown(KeyCode.F4))
-        {
-            SwitchConstellationSet(3);
-        }
-        if (Input.GetKeyDown(KeyCode.F5))
-        {
-            SwitchConstellationSet(4);
-        }
-        if (Input.GetKeyDown(KeyCode.F6))
-        {
-            SwitchConstellationSet(5);
-        }
     }
 
     void ParseStarData()
@@ -115,7 +88,6 @@ public class StarDataParser : MonoBehaviour
         bool isFirstLine = true;
 
         foreach (string line in textLines)
-            //for (int i = 0; i < numberOfStarsToGenerate; i++)
         {
             // skipping csv header line
             if (isFirstLine)
@@ -125,7 +97,6 @@ public class StarDataParser : MonoBehaviour
             else
             {
                     string[] values = line.Split(',');
-                //string[] values = textLines[i].Split(',');
                     StarData star = new StarData();
                 try
                 {
@@ -177,7 +148,6 @@ public class StarDataParser : MonoBehaviour
     {
         for (int i = 0; i < 6; i++)
         {
-            //Debug.Log("Running "+ constellationFiles[i].name);
             ParseConstellationData(i, i == 0);
         }
     }
@@ -185,9 +155,7 @@ public class StarDataParser : MonoBehaviour
     void ParseConstellationData(int index, bool setActive = false)
     {
 
-        //constellationList = JsonUtility.FromJson<ConstellationList>(constellationDataSource.text);
         constellationList = JsonUtility.FromJson<ConstellationList>(constellationFiles[index].text);
-        //Debug.Log(constellationFiles[index].name);
 
         GameObject constellationParent = new GameObject(constellationFiles[index].name.Substring(0, constellationFiles[index].name.Length-4));
         constellationParent.transform.parent = ConstellationLines.transform;
@@ -217,9 +185,10 @@ public class StarDataParser : MonoBehaviour
         constellationParent.SetActive(setActive);
     }
 
-    void SwitchConstellationSet(int indexToShow)
+    public void SwitchConstellationSet(int indexToShow)
     {
-        for(int i = 0; i < 6; i++)
+        Debug.Log(ConstellationLines.transform.childCount);
+        for(int i = 0; i <= 5; i++)
         {
             ConstellationLines.transform.GetChild(i).gameObject.SetActive(i == indexToShow);
         }
@@ -257,7 +226,6 @@ public class StarDataParser : MonoBehaviour
         bool isFirstRow = true;
 
         foreach (string row in dataRows)
-        //for (int i = 0; i < numberOfStarsToGenerate; i++)
         {
             // skipping csv header line
             if (isFirstRow)
@@ -267,8 +235,6 @@ public class StarDataParser : MonoBehaviour
             else
             {
                 string[] values = row.Split(',');
-                //string[] values = textLines[i].Split(',');
-                //StarData star = new StarData();
                 try
                 {
                     exoplanetList[values[0].Trim()] = int.Parse(values[1]);
@@ -370,9 +336,9 @@ public class StarDataParser : MonoBehaviour
         distanceToRender = newDistance;
     }
 
-    public void UpdateDistanceToRender()
+    public void UpdateDistanceToRender(float distance)
     {
-        distanceToRender = distanceToRender == 25f ? 50f : 25f;
+        distanceToRender = distance;
     }
 
     public void ChangeColorScheme()
