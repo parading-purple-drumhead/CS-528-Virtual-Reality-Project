@@ -108,18 +108,38 @@ public class StarMovement : MonoBehaviour
 
     void MoveConstellations()
     {
-        foreach (Transform constellationLine in ConstellationLines.transform)
+        
+
+        foreach (Transform constellation in ConstellationLines.transform)
         {
-            string lineName = constellationLine.gameObject.name;
-            var stars = lineName.Split('-'); 
-            var starHip1 = stars[0];
-            var starHip2 = stars[1];
+            //Debug.Log(constellationLine.gameObject.name);
+            //string lineName = constellationLine.gameObject.name;
+            //var stars = lineName.Split('-'); 
+            //var starHip1 = stars[0];
+            //var starHip2 = stars[1];
 
-            UnityEngine.Vector3 star1Pos = constellationPointsDict[starHip1];
-            UnityEngine.Vector3 star2Pos = constellationPointsDict[starHip2];
+            //UnityEngine.Vector3 star1Pos = constellationPointsDict[starHip1];
+            //UnityEngine.Vector3 star2Pos = constellationPointsDict[starHip2];
 
-            constellationLine.gameObject.GetComponent<LineRenderer>().SetPosition(0, star1Pos);
-            constellationLine.gameObject.GetComponent<LineRenderer>().SetPosition(1, star2Pos);
+            //constellationLine.gameObject.GetComponent<LineRenderer>().SetPosition(0, star1Pos);
+            //constellationLine.gameObject.GetComponent<LineRenderer>().SetPosition(1, star2Pos);
+            if (constellation.gameObject.activeInHierarchy)
+            {
+                foreach (Transform constellationLine in constellation.gameObject.transform)
+                {
+                    string lineName = constellationLine.gameObject.name;
+                    var stars = lineName.Split('-');
+                    var starHip1 = stars[0];
+                    var starHip2 = stars[1];
+
+                    UnityEngine.Vector3 star1Pos = constellationPointsDict[starHip1];
+                    UnityEngine.Vector3 star2Pos = constellationPointsDict[starHip2];
+
+                    constellationLine.gameObject.GetComponent<LineRenderer>().SetPosition(0, star1Pos);
+                    constellationLine.gameObject.GetComponent<LineRenderer>().SetPosition(1, star2Pos);
+                }
+                
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ using UnityEngine;
 public class StarDataParser : MonoBehaviour
 
 {
+    public TextAsset[] constellationFiles = new TextAsset[6];
     public GameObject ConstellationLines;
     public GameObject cam;
     Vector3 lastRenderPosition;
@@ -21,7 +22,7 @@ public class StarDataParser : MonoBehaviour
     public float scaleRatioOfStars = 0.05f;
 
     // for constellations
-    public TextAsset constellationDataSource;
+    //public TextAsset constellationDataSource;
     public ConstellationList constellationList = new ConstellationList();
     public Dictionary<string, Vector3> constellationPointsDict = new Dictionary<string, Vector3>();
     public LineRenderer linePrefab;
@@ -55,6 +56,7 @@ public class StarDataParser : MonoBehaviour
     void Start()
     {
         InvokeRepeating("LookAtMe", 0f, 2f);
+
         // Initialize lastRenderPosition to the player's current position
         lastRenderPosition = cam.transform.position;
 
@@ -64,7 +66,8 @@ public class StarDataParser : MonoBehaviour
 
         GenerateStars();
 
-        ParseConstellationData();
+        parseAllConstellations();
+        
     }
 
     void Update()
@@ -78,9 +81,29 @@ public class StarDataParser : MonoBehaviour
         }
 
         // Check if the space bar is pressed
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.F1))
         {
-            
+            SwitchConstellationSet(0);
+        }
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            SwitchConstellationSet(1);
+        }
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            SwitchConstellationSet(2);
+        }
+        if (Input.GetKeyDown(KeyCode.F4))
+        {
+            SwitchConstellationSet(3);
+        }
+        if (Input.GetKeyDown(KeyCode.F5))
+        {
+            SwitchConstellationSet(4);
+        }
+        if (Input.GetKeyDown(KeyCode.F6))
+        {
+            SwitchConstellationSet(5);
         }
     }
 
@@ -150,10 +173,24 @@ public class StarDataParser : MonoBehaviour
         }
     }
 
-    void ParseConstellationData()
+    private void parseAllConstellations()
     {
-        constellationList = JsonUtility.FromJson<ConstellationList>(constellationDataSource.text);
+        for (int i = 0; i < 6; i++)
+        {
+            //Debug.Log("Running "+ constellationFiles[i].name);
+            ParseConstellationData(i, i == 0);
+        }
+    }
 
+    void ParseConstellationData(int index, bool setActive = false)
+    {
+
+        //constellationList = JsonUtility.FromJson<ConstellationList>(constellationDataSource.text);
+        constellationList = JsonUtility.FromJson<ConstellationList>(constellationFiles[index].text);
+        //Debug.Log(constellationFiles[index].name);
+
+        GameObject constellationParent = new GameObject(constellationFiles[index].name.Substring(0, constellationFiles[index].name.Length-4));
+        constellationParent.transform.parent = ConstellationLines.transform;
         foreach (Constellation constellation in constellationList.constellations)
         {
             foreach (Pair pair in constellation.pairs)
@@ -166,7 +203,8 @@ public class StarDataParser : MonoBehaviour
 
                 // Create a line between the stars
                 GameObject lineObject = new GameObject();
-                lineObject.transform.parent = ConstellationLines.transform; // Set the parent to constellationLines
+                //lineObject.transform.parent = ConstellationLines.transform; // Set the parent to constellationLines
+                lineObject.transform.parent = constellationParent.transform;
                 lineObject.name = pair.pair[0] + "-" + pair.pair[1];
                 LineRenderer line = lineObject.AddComponent<LineRenderer>();
                 line.SetPosition(0, position1);
@@ -176,12 +214,22 @@ public class StarDataParser : MonoBehaviour
                 line.material.color = Color.white;
             }
         }
+        constellationParent.SetActive(setActive);
+    }
+
+    void SwitchConstellationSet(int indexToShow)
+    {
+        for(int i = 0; i < 6; i++)
+        {
+            ConstellationLines.transform.GetChild(i).gameObject.SetActive(i == indexToShow);
+        }
     }
 
     Vector3 GetStarPosition(string starId)
     {
-        Vector3 starPosition = starList[starId].position;
-
+        Vector3 starPosition = Vector3.zero;
+        if (starList.ContainsKey(starId))
+            starPosition = starList[starId].position;
         return starPosition;
     }
 
