@@ -3,22 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-
+using UnityEngine.UI;
 
 public class StarDataParser : MonoBehaviour
 
 {
+    public Slider scaleSlider;
     public TextAsset[] constellationFiles = new TextAsset[6];
     public GameObject ConstellationLines;
     public GameObject cam;
     Vector3 lastRenderPosition;
-    private float distanceToRender = 50f;
+    public float distanceToRender = 50f;
 
     // for stars
     public TextAsset starDataSource;
     public GameObject starPrefab;
     public Dictionary<string, StarData> starList = new Dictionary<string, StarData>();
     public float scaleRatioOfStars = 0.05f;
+    public float scaleDistanceOfStars = 1.0f;
 
     // for constellations
     //public TextAsset constellationDataSource;
@@ -308,8 +310,11 @@ public class StarDataParser : MonoBehaviour
         }
     }
 
-    public void ScaleStarDistances(float newDistance)
-    {
+    public void ScaleStarDistances() { 
+
+
+        float newDistance = scaleSlider.value * 10f;
+
         // Compute the ratio of the new distance to the current maximum visible distance
         float scaleRatio = newDistance / distanceToRender;
 
