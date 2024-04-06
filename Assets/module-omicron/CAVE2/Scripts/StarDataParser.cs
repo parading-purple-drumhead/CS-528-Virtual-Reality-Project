@@ -33,6 +33,7 @@ public class StarDataParser : MonoBehaviour
     public Dictionary<string,int> exoplanetList = new Dictionary<string,int>();
 
     private bool usePlanetColorScheme = false;
+    public bool scaleChanged = false;
 
     [System.Serializable]
     public class Pair
@@ -335,6 +336,8 @@ public class StarDataParser : MonoBehaviour
             // Update the position in both the star data and the corresponding GameObject
             star.position = updatedPosition;
             star.instance.transform.position = updatedPosition;
+            constellationPointsDict[keyValuePair.Key] = updatedPosition;
+            scaleChanged = true;
         }
 
         // Update the maximum visible distance to the new distance

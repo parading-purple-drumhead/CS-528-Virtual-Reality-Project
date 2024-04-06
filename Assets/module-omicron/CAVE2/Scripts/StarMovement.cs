@@ -81,6 +81,13 @@ public class StarMovement : MonoBehaviour
             constellationPointsDict = starDataParser.constellationPointsDict;
         }
 
+        if (starDataParser.scaleChanged)
+        {
+            constellationPointsDict = starDataParser.constellationPointsDict;
+            MoveConstellations();
+            starDataParser.scaleChanged = false;
+        }
+
         if (moveTime)
         {
             MoveStar(moveDirection);
@@ -198,63 +205,5 @@ public class StarMovement : MonoBehaviour
         }
     }
 
-    //public void ScaleStarDistances()
-    //{
-
-    //    ////Compute the ratio of the new distance to the current maximum visible distance
-    //    //float scaleRatio = (scaleSlider.value * 10) / distanceToRender;
-
-
-    //    //// Iterate over each star in the list
-    //    //foreach (var keyValuePair in starList)
-    //    //{
-    //    //    var star = keyValuePair.Value;
-
-    //    //    // Compute the vector from the camera to the current star position
-    //    //    UnityEngine.Vector3 offsetFromCamera = star.position - cam.transform.position;
-
-    //    //    // Scale this offset by our computed ratio
-    //    //    UnityEngine.Vector3 scaledOffset = offsetFromCamera * scaleRatio;
-
-    //    //    // Compute the new position of the star by adding the scaled offset to the camera position
-    //    //    UnityEngine.Vector3 updatedPosition = cam.transform.position + scaledOffset;
-
-    //    //    // Update the position in both the star data and the corresponding GameObject
-    //    //    star.position = updatedPosition;
-    //    //    star.instance.transform.position = updatedPosition;
-    //    //    constellationPointsDict[keyValuePair.Key] = updatedPosition;
-
-    //    //}
-    //    //distanceToRender = scaleSlider.value * 10;
-
-    //    // Compute the ratio of the new distance to the current maximum visible distance
-    //    float scaleRatio = (scaleSlider.value * 10) / distanceToRender;
-
-    //    // Iterate over each star in the list
-    //    foreach (var keyValuePair in starList)
-    //    {
-    //        var star = keyValuePair.Value;
-
-    //        // Compute the vector from the camera to the current star position
-    //        UnityEngine.Vector3 offsetFromCamera = star.position - cam.transform.position;
-
-    //        // Scale this offset by our computed ratio
-    //        UnityEngine.Vector3 scaledOffset = offsetFromCamera * scaleRatio;
-
-    //        // Compute the new position of the star by adding the scaled offset to the camera position
-    //        UnityEngine.Vector3 updatedPosition = cam.transform.position + scaledOffset;
-
-    //        // Update the position in both the star data and the corresponding GameObject
-    //        star.position = updatedPosition;
-    //        star.instance.transform.position = updatedPosition;
-    //    }
-
-    //    // Update the maximum visible distance to the new distance
-    //    distanceToRender = (scaleSlider.value * 10);
-
-    //    //MoveConstellations();
-
-    //    // Update the maximum visible distance to the new distance
-        
-    //}
+    // TO-DO: Show rates
 }
