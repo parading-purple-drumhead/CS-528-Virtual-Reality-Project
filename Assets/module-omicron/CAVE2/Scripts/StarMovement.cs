@@ -9,9 +9,9 @@ using UnityEngine.UI;
 public class StarMovement : MonoBehaviour
 {
     public Slider speedSlider;
-    public Slider scaleSlider;
     private StarDataParser starDataParser;
     public TextMeshProUGUI timeElapsedText;
+    public Text speedValueText;
 
     private UnityEngine.Vector3 initialUserPosition;
     private UnityEngine.Quaternion initialUserRotation;
@@ -111,10 +111,13 @@ public class StarMovement : MonoBehaviour
 
         foreach (var keyValuePair in starList)
         {
-            
             var star = keyValuePair.Value;
+            star.position = originalStarList[keyValuePair.Key].position;
             star.instance.transform.position = originalStarList[keyValuePair.Key].position;
+            constellationPointsDict[keyValuePair.Key] = originalStarList[keyValuePair.Key].position;
         }
+
+        MoveConstellations();
 
         player.transform.position = initialUserPosition;
         cam.transform.rotation = initialUserRotation;
@@ -123,6 +126,8 @@ public class StarMovement : MonoBehaviour
         yearsPassed = 0;
         timeElapsedText.text = "Time Elapsed:\n" + (int)yearsPassed + " years";
 
+
+        //TO-DO: Fix constellation positions to default
     }
 
     void MoveStar(int direction)
@@ -183,27 +188,29 @@ public class StarMovement : MonoBehaviour
             case 0:
             {
                     timeSpeedFactor = 500;
+                    speedValueText.text = timeSpeedFactor + "x";
                     break;
             }
             case 1:
             {
-                    timeSpeedFactor = 1000; 
+                    timeSpeedFactor = 1000;
+                    speedValueText.text = timeSpeedFactor + "x";
                     break;
 
             }
             case 2:
             {
                 timeSpeedFactor = 2000;
+                speedValueText.text = timeSpeedFactor + "x";
                 break;
             }
             case 3:
             {
-                timeSpeedFactor = 5000; 
+                timeSpeedFactor = 5000;
+                speedValueText.text = timeSpeedFactor + "x";
                 break;
 
             }
         }
     }
-
-    // TO-DO: Show rates
 }

@@ -8,12 +8,18 @@ using UnityEngine.UI;
 public class StarDataParser : MonoBehaviour
 
 {
+    private StarMovement starMovement;
+
+    public AudioSource ambientMusic;
     public Slider scaleSlider;
+    public Text scaleValueText;
     public TextAsset[] constellationFiles = new TextAsset[6];
     public GameObject ConstellationLines;
     public GameObject cam;
     Vector3 lastRenderPosition;
     public float distanceToRender = 50f;
+    //public Toggle showFeaturedConstellationToggle;
+    //public Toggle modernConstellationsToggle;
 
     // for stars
     public TextAsset starDataSource;
@@ -27,6 +33,8 @@ public class StarDataParser : MonoBehaviour
     public ConstellationList constellationList = new ConstellationList();
     public Dictionary<string, Vector3> constellationPointsDict = new Dictionary<string, Vector3>();
     public LineRenderer linePrefab;
+    public GameObject FeaturedConstellation;
+    public GameObject FeaturedConstellationInfo;
 
     // for exoplanet
     public TextAsset exoplanetDataSource;
@@ -34,6 +42,7 @@ public class StarDataParser : MonoBehaviour
 
     private bool usePlanetColorScheme = false;
     public bool scaleChanged = false;
+    private bool showFeaturedConstellation = false;
 
     [System.Serializable]
     public class Pair
@@ -57,6 +66,9 @@ public class StarDataParser : MonoBehaviour
 
     void Start()
     {
+        // Find the StarDataParser object
+        starMovement = FindObjectOfType<StarMovement>();
+
         InvokeRepeating("LookAtMe", 0f, 2f);
 
         // Initialize lastRenderPosition to the player's current position
@@ -81,6 +93,7 @@ public class StarDataParser : MonoBehaviour
             SelectiveRender();
             lastRenderPosition = cam.transform.position;
         }
+
     }
 
     void ParseStarData()
@@ -153,11 +166,12 @@ public class StarDataParser : MonoBehaviour
         {
             ParseConstellationData(i, i == 0);
         }
+
+        ScaleStarDistances();
     }
 
     void ParseConstellationData(int index, bool setActive = false)
     {
-
         constellationList = JsonUtility.FromJson<ConstellationList>(constellationFiles[index].text);
 
         GameObject constellationParent = new GameObject(constellationFiles[index].name.Substring(0, constellationFiles[index].name.Length-4));
@@ -183,14 +197,27 @@ public class StarDataParser : MonoBehaviour
                 line.useWorldSpace = true;
                 line.startWidth = line.endWidth = 0.1f;
                 line.material.color = Color.white;
+
+                if (constellation.name == "UMa")
+                {
+                    GameObject featuredLineObject = new GameObject();
+                    featuredLineObject.transform.parent = FeaturedConstellation.transform;
+                    featuredLineObject.name = pair.pair[0] + "-" + pair.pair[1];
+                    LineRenderer featuredLine = featuredLineObject.AddComponent<LineRenderer>();
+                    featuredLine.SetPosition(0, position1);
+                    featuredLine.SetPosition(1, position2);
+                    featuredLine.useWorldSpace = true;
+                    featuredLine.startWidth = featuredLine.endWidth = 0.1f;
+                    featuredLine.material.color = Color.white;
+                }
             }
         }
         constellationParent.SetActive(setActive);
+        FeaturedConstellation.SetActive(false);
     }
 
     public void SwitchConstellationSet(int indexToShow)
     {
-        Debug.Log(ConstellationLines.transform.childCount);
         for(int i = 0; i <= 5; i++)
         {
             ConstellationLines.transform.GetChild(i).gameObject.SetActive(i == indexToShow);
@@ -313,6 +340,7 @@ public class StarDataParser : MonoBehaviour
 
     public void ScaleStarDistances() { 
 
+        scaleValueText.text = (int)scaleSlider.value - 2 + "x";
 
         float newDistance = scaleSlider.value * 10f;
 
@@ -356,5 +384,21 @@ public class StarDataParser : MonoBehaviour
 
         // Update the colors of the stars
         UpdateStarColors();
+    }
+
+    public void ShowFeaturedConstellation(bool show)
+    {
+        starMovement.ResetTime();
+
+        //showFeaturedConstellation = !showFeaturedConstellation;
+
+        SwitchConstellationSet(show ? -1 : 0);
+        FeaturedConstellation.SetActive(show);
+        FeaturedConstellationInfo.SetActive(show);
+
+        ambientMusic.volume = show ? 0.5f: 1f;
+
+        //showFeaturedConstellationToggle.isOn = showFeaturedConstellation;
+        //modernConstellationsToggle.isOn = !showFeaturedConstellation;
     }
 }

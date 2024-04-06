@@ -278,7 +278,7 @@ public class OMenu : MonoBehaviour {
         showMenu = true;
     }
 
-    void HideMenu()
+    public void HideMenu()
     {
         showMenu = false;
     }
