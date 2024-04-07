@@ -42,7 +42,6 @@ public class StarDataParser : MonoBehaviour
 
     private bool usePlanetColorScheme = false;
     public bool scaleChanged = false;
-    private bool showFeaturedConstellation = false;
 
     [System.Serializable]
     public class Pair
@@ -335,6 +334,8 @@ public class StarDataParser : MonoBehaviour
             {
                 return Color.white; // Default color
             }
+
+            // TO-DO: Update colors
         }
     }
 
@@ -386,17 +387,22 @@ public class StarDataParser : MonoBehaviour
         UpdateStarColors();
     }
 
-    public void ShowFeaturedConstellation(bool show)
+    //public void ShowFeaturedConstellation(bool show, int index)
+    public void ShowFeaturedConstellation(string args)
     {
+
+        bool show = bool.Parse(args.Split('|')[0]);
+        int index = int.Parse(args.Split('|')[1]);
+
         starMovement.ResetTime();
 
         //showFeaturedConstellation = !showFeaturedConstellation;
 
-        SwitchConstellationSet(show ? -1 : 0);
+        SwitchConstellationSet(show ? -1 : index);
         FeaturedConstellation.SetActive(show);
         FeaturedConstellationInfo.SetActive(show);
 
-        ambientMusic.volume = show ? 0.5f: 1f;
+        ambientMusic.volume = show ? 0.2f: 1f;
 
         //showFeaturedConstellationToggle.isOn = showFeaturedConstellation;
         //modernConstellationsToggle.isOn = !showFeaturedConstellation;
