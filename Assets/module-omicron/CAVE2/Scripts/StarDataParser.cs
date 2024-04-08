@@ -10,6 +10,7 @@ public class StarDataParser : MonoBehaviour
 {
     private StarMovement starMovement;
 
+    public GameObject legend;
     public AudioSource ambientMusic;
     public Slider scaleSlider;
     public Text scaleValueText;
@@ -291,6 +292,7 @@ public class StarDataParser : MonoBehaviour
     {
         if (usePlanetColorScheme)
         {
+            legend.gameObject.SetActive(true);
             // Define your color scheme based on the number of planets here
             Color[] planetColorScheme = new Color[] { Color.white, Color.yellow, Color.green, Color.blue, Color.magenta, Color.red };
 
@@ -308,6 +310,7 @@ public class StarDataParser : MonoBehaviour
         }
         else
         {
+            legend.gameObject.SetActive(false);
             Color orange = new Color(1.0f, 0.64f, 0.0f); // RGB for Orange
 
             if (spect == "O")
@@ -334,8 +337,6 @@ public class StarDataParser : MonoBehaviour
             {
                 return Color.white; // Default color
             }
-
-            // TO-DO: Update colors
         }
     }
 
